@@ -31,8 +31,10 @@ describe('clean', () => {
     expect(distExists).toBe(true)
 
     // Verify old files are cleaned
-    const oldFileExists = await fsExists(path.join(distPath, 'old-file.js'))
-    const oldTypesExists = await fsExists(path.join(distPath, 'old-file.d.ts'))
+    const oldFileExists = await fsExists(path.resolve(distPath, 'old-file.js'))
+    const oldTypesExists = await fsExists(
+      path.resolve(distPath, 'old-file.d.ts'),
+    )
     expect(oldFileExists).toBe(false)
     expect(oldTypesExists).toBe(false)
   })
@@ -62,7 +64,7 @@ describe('clean', () => {
     expect(distExists).toBe(true)
 
     // Verify old files are not cleaned
-    const oldFileExists = await fsExists(path.join(distPath, 'old-file.js'))
+    const oldFileExists = await fsExists(path.resolve(distPath, 'old-file.js'))
     expect(oldFileExists).toBe(true)
   })
 
@@ -101,7 +103,7 @@ describe('clean', () => {
 
     // Verify old files are cleaned
     const oldFileExists = await fsExists(
-      path.join(customOutPath, 'old-file.js'),
+      path.resolve(customOutPath, 'old-file.js'),
     )
     expect(oldFileExists).toBe(false)
   })
@@ -115,13 +117,14 @@ describe('clean', () => {
     const testDir = getTestDir(context.task)
     const distPath = path.join(testDir, 'dist')
     const buildPath = path.join(testDir, 'build')
+    const logPath = path.join(testDir, 'app.log')
 
     await mkdir(distPath, { recursive: true })
     await mkdir(buildPath, { recursive: true })
 
-    await writeFile(path.join(distPath, 'old-file.js'), 'old content')
-    await writeFile(path.join(buildPath, 'build-file.js'), 'build content')
-    await writeFile(path.join(testDir, 'app.log'), 'log content')
+    await writeFile(path.resolve(distPath, 'old-file.js'), 'old content')
+    await writeFile(path.resolve(buildPath, 'build-file.js'), 'build content')
+    await writeFile(logPath, 'log content')
 
     // Run build with multiple pattern cleanup
     await testBuild({
@@ -135,7 +138,7 @@ describe('clean', () => {
     // Verify multiple patterns are cleaned
     const distExists = await fsExists(distPath)
     const buildExists = await fsExists(buildPath)
-    const logExists = await fsExists(path.join(testDir, 'app.log'))
+    const logExists = await fsExists(logPath)
 
     expect(distExists).toBe(true) // Dist will be recreated
     expect(buildExists).toBe(false) // Build should be cleaned
@@ -170,8 +173,8 @@ describe('clean', () => {
     const nestedPath = path.join(distPath, 'nested', 'deep')
 
     await mkdir(nestedPath, { recursive: true })
-    await writeFile(path.join(nestedPath, 'deep-file.js'), 'deep content')
-    await writeFile(path.join(distPath, 'root-file.js'), 'root content')
+    await writeFile(path.resolve(nestedPath, 'deep-file.js'), 'deep content')
+    await writeFile(path.resolve(distPath, 'root-file.js'), 'root content')
 
     // Run build with nested directory cleanup
     await testBuild({
@@ -199,7 +202,7 @@ describe('clean', () => {
     const testDir = getTestDir(context.task)
     const outputPath = path.join(testDir, 'output')
     await mkdir(outputPath, { recursive: true })
-    await writeFile(path.join(outputPath, 'old-file.js'), 'old content')
+    await writeFile(path.resolve(outputPath, 'old-file.js'), 'old content')
 
     // Run build with custom output directory cleanup
     await testBuild({
@@ -216,7 +219,9 @@ describe('clean', () => {
     expect(outputExists).toBe(true) // Output directory will be recreated
 
     // Verify old files are cleaned
-    const oldFileExists = await fsExists(path.join(outputPath, 'old-file.js'))
+    const oldFileExists = await fsExists(
+      path.resolve(outputPath, 'old-file.js'),
+    )
     expect(oldFileExists).toBe(false)
   })
 
@@ -227,9 +232,13 @@ describe('clean', () => {
 
     // Create test directories and files first
     const testDir = getTestDir(context.task)
-    await writeFile(path.join(testDir, 'test.tmp'), 'temporary file')
-    await writeFile(path.join(testDir, 'app.log'), 'log file')
-    await writeFile(path.join(testDir, 'keep.js'), 'keep this file')
+    const tmpPath = path.join(testDir, 'test.tmp')
+    const logPath = path.join(testDir, 'app.log')
+    const keepPath = path.join(testDir, 'keep.js')
+
+    await writeFile(tmpPath, 'temporary file')
+    await writeFile(logPath, 'log file')
+    await writeFile(keepPath, 'keep this file')
 
     // Run build with specific extension cleanup
     await testBuild({
@@ -241,9 +250,9 @@ describe('clean', () => {
     })
 
     // Verify files with specific extensions are cleaned
-    const tmpExists = await fsExists(path.join(testDir, 'test.tmp'))
-    const logExists = await fsExists(path.join(testDir, 'app.log'))
-    const keepExists = await fsExists(path.join(testDir, 'keep.js'))
+    const tmpExists = await fsExists(tmpPath)
+    const logExists = await fsExists(logPath)
+    const keepExists = await fsExists(keepPath)
 
     expect(tmpExists).toBe(false)
     expect(logExists).toBe(false)
