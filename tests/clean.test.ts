@@ -232,7 +232,7 @@ describe('clean', () => {
 
     // Create test directories and files first
     const testDir = getTestDir(context.task)
-    const logPath = path.join(testDir, 'app.log')
+    const logPath = path.join(testDir, 'app.js')
     const keepPath = path.join(testDir, 'keep.js')
 
     await writeFile(logPath, 'log file')
@@ -243,7 +243,7 @@ describe('clean', () => {
       context,
       files,
       options: {
-        clean: ['*.log'],
+        clean: ['*.log', 'app.js'],
       },
     })
 
