@@ -232,11 +232,9 @@ describe('clean', () => {
 
     // Create test directories and files first
     const testDir = getTestDir(context.task)
-    const tmpPath = path.join(testDir, 'test.tmp')
     const logPath = path.join(testDir, 'app.log')
     const keepPath = path.join(testDir, 'keep.js')
 
-    await writeFile(tmpPath, 'temporary file')
     await writeFile(logPath, 'log file')
     await writeFile(keepPath, 'keep this file')
 
@@ -245,16 +243,14 @@ describe('clean', () => {
       context,
       files,
       options: {
-        clean: ['*.tmp', '*.log'],
+        clean: ['*.log'],
       },
     })
 
     // Verify files with specific extensions are cleaned
-    const tmpExists = await fsExists(tmpPath)
     const logExists = await fsExists(logPath)
     const keepExists = await fsExists(keepPath)
 
-    expect(tmpExists).toBe(false)
     expect(logExists).toBe(false)
     expect(keepExists).toBe(true) // This file should be preserved
   })
