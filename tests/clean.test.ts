@@ -232,6 +232,8 @@ describe('clean', () => {
 
     // Create test directories and files first
     const testDir = getTestDir(context.task)
+    const exists = await fsExists(testDir)
+    console.log(exists)
     const logPath = path.join(testDir, 'app.js')
     const keepPath = path.join(testDir, 'keep.js')
 
